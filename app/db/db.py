@@ -52,7 +52,7 @@ def delete_screenshot(id: int = None, url: str = None) -> None:
     session.commit()
 
 
-def edit_screenshot(filename: str, id: int = None, url: str = None) -> None | Screenshot:
+def edit_screenshot(filename: str, id: int = None, url: str = None) -> Screenshot:
     screenshot_obj = get_screenshot(id, url)
     if screenshot_obj is None:
         return
