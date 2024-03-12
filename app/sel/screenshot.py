@@ -16,12 +16,3 @@ def make_screenshot(url: str) -> bytes:
     img = driver.get_screenshot_as_png()
     driver.quit()
     return img
-
-
-def save_screenshot(img_data: bytes, path: str) -> None:
-    with open(path, 'wb') as file:
-        file.write(img_data)
-
-
-def delete_screenshot(path: str) -> None:
-    os.remove(path)

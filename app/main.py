@@ -1,9 +1,8 @@
 from fastapi import FastAPI, Response
-from fastapi.exceptions import HTTPException
-from sel.screenshot import make_screenshot, save_screenshot, delete_screenshot
+from sel.screenshot import make_screenshot
 from minio_S3.minio import minio_upload, minio_request
+from io import BytesIO
 import db.db as db
-import os
 import hashlib
 import time
 import random
@@ -24,15 +23,10 @@ async def get_screenshot(url: str, is_fresh: bool) -> Response:
     if is_fresh or db.get_screenshot(url=url) is None:
         filename = f"{generate_hash()}.png"
         img_data = make_screenshot(url)
-        if not (os.path.exists('screenshots') or os.path.isdir('screenshots')):
-            os.mkdir('screenshots')
-        path_to_img = os.path.join('screenshots', filename)
-        try:
-            save_screenshot(img_data, path_to_img)
-        except Exception:
-            raise HTTPException(500, 'Error occurred while saving screenshot')
-        minio_upload(filename, path_to_img, 'image/png')
-        delete_screenshot(path_to_img)
+        img_file = BytesIO(img_data)
+        img_file.seek(0)
+        minio_upload(filename, img_file, 'image/png')
+        img_file.close()
         if db.get_screenshot(url=url) is None:
             db.new_screenshot(url, filename)
         else:

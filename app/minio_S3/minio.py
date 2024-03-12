@@ -1,4 +1,5 @@
 from minio import Minio, S3Error
+from io import BytesIO
 
 
 def minio_request(object_name: str) -> None:
@@ -16,7 +17,7 @@ def minio_request(object_name: str) -> None:
         print(f"Error getting image: {e}")
 
 
-def minio_upload(filename: str, filepath: str, content_type: str) -> dict:
+def minio_upload(filename: str, file_object: object, content_type: str) -> dict:
     bucket_name = 'mybucket'
     found = minio_client.bucket_exists(bucket_name)
     if not found:
@@ -24,9 +25,8 @@ def minio_upload(filename: str, filepath: str, content_type: str) -> dict:
     else:
         print(f"Bucket {bucket_name} already exists")
     try:
-        result = minio_client.fput_object(
-            bucket_name, filename, filepath, content_type
-        )
+        result = minio_client.put_object(bucket_name, filename, file_object,
+                                         file_object.getbuffer().nbytes, content_type)
         print(f"File {filename} successfully uploaded to Minio")
         return {"filename": result.object_name}
     except S3Error as e:
