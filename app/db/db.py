@@ -1,6 +1,12 @@
 from sqlalchemy import Column, Integer, String, select, update
 from sqlalchemy.orm import declarative_base 
 from sqlalchemy.ext.asyncio import async_sessionmaker, AsyncSession, create_async_engine
+import os
+
+
+postgres_password = os.getenv('POSTGRES_PASSWORD')
+postgres_user = os.getenv('POSTGRES_USER')
+postgres_db = os.getenv('POSTGRES_DB')
 
 Base = declarative_base()
 
@@ -15,7 +21,7 @@ class Screenshot(Base):
     def __repr__(self) -> str:
         return f'{self.id=}, {self.url=}, {self.filename=}'
 
-DATABASE_URL = "postgresql+asyncpg://postgres:postgres@db:5432/postgres"
+DATABASE_URL = f"postgresql+asyncpg://{postgres_user}:{postgres_password}@db:5432/{postgres_db}"
 
 engine = create_async_engine(DATABASE_URL, echo=True)
 

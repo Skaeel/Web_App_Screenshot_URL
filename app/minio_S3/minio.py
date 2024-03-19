@@ -1,5 +1,5 @@
 from minio import Minio, S3Error
-from io import BytesIO
+import os
 
 
 def minio_request(object_name: str) -> None:
@@ -34,10 +34,13 @@ def minio_upload(filename: str, file_object: object, content_type: str) -> dict:
         return {"error": str(e)}
 
 
+minio_root_user = os.getenv('MINIO_ROOT_USER')
+minio_root_password = os.getenv('MINIO_ROOT_PASSWORD')
+
 minio_config = {
     'endpoint': 'minio:9000',
-    'access_key': 'minioadmin',
-    'secret_key': 'minioadmin',
+    'access_key': f'{minio_root_user}',
+    'secret_key': f'{minio_root_password}',
     'secure': False
 }
 
