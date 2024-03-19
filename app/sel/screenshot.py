@@ -4,7 +4,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
 
-async def make_screenshot(url: str) -> bytes:
+def make_screenshot(url: str) -> bytes:
     options = webdriver.FirefoxOptions()
     options.add_argument('--headless')
     options.add_argument('--disable-blink-features=AutomationControlled')

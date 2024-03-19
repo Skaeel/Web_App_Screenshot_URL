@@ -29,12 +29,13 @@ app = FastAPI(lifespan=lifespan)
 
 @app.get('/')
 async def get_screenshot(url: str, is_fresh: bool) -> Response:
+    loop = asyncio.get_running_loop()
     if is_fresh or await db.get_screenshot(async_session, url=url) is None:
         filename = f"{generate_hash()}.png"
-        img_data = await make_screenshot(url)
+        img_data = await loop.run_in_executor(None, make_screenshot, url)
         img_file = BytesIO(img_data)
         img_file.seek(0)
-        minio_upload(filename, img_file, 'image/png')
+        await loop.run_in_executor(None, minio_upload, filename, img_file, 'image/png')
         img_file.close()
         if await db.get_screenshot(async_session, url=url) is None:
             await db.new_screenshot(async_session, url, filename)
@@ -43,7 +44,7 @@ async def get_screenshot(url: str, is_fresh: bool) -> Response:
 
     elif not is_fresh:
         img_obj = await db.get_screenshot(async_session, url=url)
-        img_data = minio_request(img_obj.filename)
+        img_data = await loop.run_in_executor(None, minio_request, img_obj.filename)
         img_data = img_data.read()
 
     return Response(content=img_data, media_type='image/png')
