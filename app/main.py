@@ -1,4 +1,5 @@
 from fastapi import FastAPI, Response
+from contextlib import asynccontextmanager
 from sel.screenshot import make_screenshot
 from minio_S3.minio import minio_upload, minio_request
 from io import BytesIO
@@ -16,12 +17,13 @@ def generate_hash() -> str:
     return hash_obj.hexdigest()
 
 
-app = FastAPI()
-
-
-@app.on_event('startup')
-async def startup_event():
+@asynccontextmanager
+async def lifespan(app: FastAPI):
     await db.init_table(engine) 
+    yield
+
+
+app = FastAPI(lifespan=lifespan)
 
 
 @app.get('/')
@@ -40,7 +42,6 @@ async def get_screenshot(url: str, is_fresh: bool) -> Response:
 
     elif not is_fresh:
         img_obj = await db.get_screenshot(async_session, url=url)
-        print(f"======================{type(img_obj)}================{img_obj}===============")
         img_data = minio_request(img_obj.filename)
         img_data = img_data.read()
 
