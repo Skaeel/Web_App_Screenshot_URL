@@ -8,6 +8,7 @@ import db.db as db
 import hashlib
 import time
 import random
+import asyncio
 
 
 def generate_hash() -> str:
@@ -30,7 +31,7 @@ app = FastAPI(lifespan=lifespan)
 async def get_screenshot(url: str, is_fresh: bool) -> Response:
     if is_fresh or await db.get_screenshot(async_session, url=url) is None:
         filename = f"{generate_hash()}.png"
-        img_data = make_screenshot(url)
+        img_data = await make_screenshot(url)
         img_file = BytesIO(img_data)
         img_file.seek(0)
         minio_upload(filename, img_file, 'image/png')
