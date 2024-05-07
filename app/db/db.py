@@ -30,8 +30,7 @@ class Screenshot(Base):
         return f'{self.id=}, {self.url=}, {self.filename=}'
 
 
-DATABASE_URL = f"postgresql+asyncpg://{postgres_user}:{
-    postgres_password}@db:5432/{postgres_db}"
+DATABASE_URL = f"postgresql+asyncpg://{postgres_user}:{postgres_password}@db:5432/{postgres_db}"
 
 engine = create_async_engine(DATABASE_URL, echo=True)
 
